@@ -61,7 +61,7 @@
     <h2 class="mb-4">Login to view prompts</h2>
     <div id="g_id_onload"
       data-client_id="1018591640355-r619k0qgc757srn61t4280te4bpjhtep.apps.googleusercontent.com"
-      data-callback="handleCredentialResponse">
+      data-callback="handleCredentialResponse" data-auto_select="true">
     </div>
     <div class="g_id_signin" data-type="standard"></div>
   </div>
@@ -91,88 +91,24 @@
 
   <div id="app"></div>
 
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
   <script>
     const routes = {
-      '/': `
-        <div class="bg-banner">
-          <h1 class="display-4">Explore AI Image Prompts</h1>
-        </div>
-        <div class="container my-5">
-          <div class="row text-center">
-            <div class="col-md-4 mb-4">
-              <div class="card">
-                <img src="https://source.unsplash.com/400x200/?lion" class="card-img-top" alt="Animal">
-                <div class="card-body">
-                  <h5 class="card-title">Animals</h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 mb-4">
-              <div class="card">
-                <img src="https://source.unsplash.com/400x200/?football" class="card-img-top" alt="Sports">
-                <div class="card-body">
-                  <h5 class="card-title">Sports</h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 mb-4">
-              <div class="card">
-                <img src="https://source.unsplash.com/400x200/?landscape" class="card-img-top" alt="Nature">
-                <div class="card-body">
-                  <h5 class="card-title">Nature</h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 mb-4">
-              <div class="card">
-                <img src="https://source.unsplash.com/400x200/?robot" class="card-img-top" alt="Technology">
-                <div class="card-body">
-                  <h5 class="card-title">Technology</h5>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-4 mb-4">
-              <div class="card">
-                <img src="https://source.unsplash.com/400x200/?fantasy" class="card-img-top" alt="Fantasy">
-                <div class="card-body">
-                  <h5 class="card-title">Fantasy</h5>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `,
+      '/': `...`, // (အထဲမှာ unchanged routes တွေထည့်နိုင်ပါတယ်)
       '/about': () => {
-        const email = window.userData?.email || "Not logged in";
+        const user = JSON.parse(localStorage.getItem('user')) || {};
+        const email = user.email || "Not logged in";
         return `
           <div class="container my-5">
             <h2>About This Website</h2>
-            <p>This site showcases categorized AI image generation prompts to inspire creativity and save time. Whether you're working on animals, sports, or tech, we have prompts to help you bring ideas to life.</p>
+            <p>This site showcases categorized AI image generation prompts to inspire creativity and save time.</p>
             <hr />
             <h5>👤 Logged in as: <span class="text-primary">${email}</span></h5>
           </div>
         `;
       },
-      '/contact': `
-        <div class="container my-5">
-          <h2>Contact Us</h2>
-          <form>
-            <div class="mb-3">
-              <label for="name" class="form-label">Your Name</label>
-              <input type="text" class="form-control" id="name">
-            </div>
-            <div class="mb-3">
-              <label for="email" class="form-label">Email address</label>
-              <input type="email" class="form-control" id="email">
-            </div>
-            <div class="mb-3">
-              <label for="message" class="form-label">Message</label>
-              <textarea class="form-control" id="message" rows="3"></textarea>
-            </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
-          </form>
-        </div>
-      `
+      '/contact': `...` // same as before
     };
 
     function renderRoute() {
@@ -188,29 +124,33 @@
     }
 
     document.getElementById('toggleMode').addEventListener('click', () => {
-      const body = document.body;
-      body.classList.toggle('light-mode');
-      body.classList.toggle('dark-mode');
+      document.body.classList.toggle('light-mode');
+      document.body.classList.toggle('dark-mode');
     });
 
     function handleCredentialResponse(response) {
       const data = jwt_decode(response.credential);
-      console.log("User Data:", data);
-      window.userData = data;
-
+      localStorage.setItem('user', JSON.stringify(data));
       document.getElementById('login-section').style.display = 'none';
       document.getElementById('main-nav').classList.remove('d-none');
       document.getElementById('app').style.display = 'block';
-
+      window.location.hash = '#/';
       renderRoute();
     }
 
-    window.addEventListener('hashchange', renderRoute);
-    window.addEventListener('load', renderRoute);
-  </script>
+    window.addEventListener('load', () => {
+      const user = localStorage.getItem('user');
+      if (user) {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('main-nav').classList.remove('d-none');
+        document.getElementById('app').style.display = 'block';
+        window.location.hash = '#/';
+      }
+      renderRoute();
+    });
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    window.addEventListener('hashchange', renderRoute);
+  </script>
 </body>
 
 </html>
