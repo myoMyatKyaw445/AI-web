@@ -142,12 +142,17 @@
           </div>
         </div>
       `,
-      '/about': `
-        <div class="container my-5">
-          <h2>About This Website</h2>
-          <p>This site showcases categorized AI image generation prompts to inspire creativity and save time. Whether you're working on animals, sports, or tech, we have prompts to help you bring ideas to life.</p>
-        </div>
-      `,
+      '/about': () => {
+        const email = window.userData?.email || "Not logged in";
+        return `
+          <div class="container my-5">
+            <h2>About This Website</h2>
+            <p>This site showcases categorized AI image generation prompts to inspire creativity and save time. Whether you're working on animals, sports, or tech, we have prompts to help you bring ideas to life.</p>
+            <hr />
+            <h5>👤 Logged in as: <span class="text-primary">${email}</span></h5>
+          </div>
+        `;
+      },
       '/contact': `
         <div class="container my-5">
           <h2>Contact Us</h2>
@@ -178,11 +183,9 @@
           link.classList.add('active');
         }
       });
-      document.getElementById('app').innerHTML = routes[path] || '<div class="container my-5"><h2>Page Not Found</h2></div>';
+      const content = typeof routes[path] === 'function' ? routes[path]() : routes[path];
+      document.getElementById('app').innerHTML = content || '<div class="container my-5"><h2>Page Not Found</h2></div>';
     }
-
-    window.addEventListener('hashchange', renderRoute);
-    window.addEventListener('load', renderRoute);
 
     document.getElementById('toggleMode').addEventListener('click', () => {
       const body = document.body;
@@ -192,12 +195,20 @@
 
     function handleCredentialResponse(response) {
       const data = jwt_decode(response.credential);
+      console.log("User Data:", data);
+      window.userData = data;
+
       document.getElementById('login-section').style.display = 'none';
       document.getElementById('main-nav').classList.remove('d-none');
       document.getElementById('app').style.display = 'block';
+
       renderRoute();
     }
+
+    window.addEventListener('hashchange', renderRoute);
+    window.addEventListener('load', renderRoute);
   </script>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 </body>
